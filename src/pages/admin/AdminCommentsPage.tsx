@@ -1,11 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { ArrowLeft, ArchiveX } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDistanceToNow } from "date-fns";
 
 export default function AdminCommentsPage() {
+  const queryClient = useQueryClient();
   const { data: comments, isLoading } = useQuery({
     queryKey: ["admin_comments"],
     queryFn: async () => {
@@ -17,6 +19,15 @@ export default function AdminCommentsPage() {
       return data;
     },
   });
+
+  const handleArchive = async (id: string) => {
+    try {
+      await supabase.from("comments").delete().eq("id", id);
+      queryClient.invalidateQueries({ queryKey: ["admin_comments"] });
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   return (
     <main className="container mx-auto max-w-2xl px-4 py-8">
@@ -40,9 +51,18 @@ export default function AdminCommentsPage() {
                 </span>
               </div>
               <p className="text-sm">{c.content}</p>
-              <p className="mt-2 text-xs text-muted-foreground">
-                On: {c.works?.title || `Chapter ${c.chapters?.chapter_number}: ${c.chapters?.title}`}
-              </p>
+              <div className="mt-2 flex items-center justify-between">
+                <p className="text-xs text-muted-foreground">
+                  On: {c.works?.title || `Chapter ${c.chapters?.chapter_number}: ${c.chapters?.title}`}
+                </p>
+                <button
+                  onClick={() => handleArchive(c.id)}
+                  className="flex items-center gap-1 text-xs text-destructive hover:underline"
+                  title="Archive (Delete) Comment"
+                >
+                  <ArchiveX className="h-3 w-3" /> Archive
+                </button>
+              </div>
             </div>
           ))}
         </div>

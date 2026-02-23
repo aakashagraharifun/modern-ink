@@ -25,7 +25,18 @@ export default function AdminUploadPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim()) return;
+    if (!title.trim()) {
+      toast.error("Title is required");
+      return;
+    }
+    if (format === "text" && !content.trim()) {
+      toast.error("Content is required");
+      return;
+    }
+    if (format === "pdf" && !pdfFile) {
+      toast.error("PDF File is required for PDF format");
+      return;
+    }
     setLoading(true);
 
     try {

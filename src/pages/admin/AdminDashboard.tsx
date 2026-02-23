@@ -1,16 +1,18 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Eye, Heart, MessageSquare, Plus, LogOut } from "lucide-react";
+import { Eye, Heart, MessageSquare, Plus, LogOut, Trash2, Edit } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const { data: works, isLoading } = useQuery({
     queryKey: ["admin_works"],
@@ -36,6 +38,19 @@ export default function AdminDashboard() {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate("/");
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm("Are you sure you want to delete this work? This action cannot be undone.")) {
+      try {
+        const { error } = await supabase.from("works").delete().eq("id", id);
+        if (error) throw error;
+        toast.success("Work deleted successfully!");
+        queryClient.invalidateQueries({ queryKey: ["admin_works"] });
+      } catch (err: any) {
+        toast.error(err.message || "Failed to delete work");
+      }
+    }
   };
 
   return (
@@ -105,6 +120,7 @@ export default function AdminDashboard() {
                 <TableHead className="text-right">Views</TableHead>
                 <TableHead className="text-right">Likes</TableHead>
                 <TableHead className="text-right">Pinned</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -121,6 +137,18 @@ export default function AdminDashboard() {
                   <TableCell className="text-right">{w.view_count}</TableCell>
                   <TableCell className="text-right">{w.like_count}</TableCell>
                   <TableCell className="text-right">{w.is_pinned ? "⭐" : "—"}</TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <Button asChild variant="ghost" size="icon">
+                        <Link to={`/admin/edit/${w.id}`}>
+                          <Edit className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                      <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => handleDelete(w.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
               {works?.length === 0 && (

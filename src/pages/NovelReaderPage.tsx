@@ -10,6 +10,7 @@ import { Menu, BookOpen } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { RollingReader } from "@/components/RollingReader";
 
 export default function NovelReaderPage() {
   const { id } = useParams<{ id: string }>();
@@ -142,7 +143,7 @@ export default function NovelReaderPage() {
             <SheetContent side="left" className="w-64">
               <SheetTitle className="font-serif">Chapters</SheetTitle>
               <div className="mt-4">
-                <ChapterList onSelect={() => {}} />
+                <ChapterList onSelect={() => { }} />
               </div>
             </SheetContent>
           </Sheet>
@@ -160,15 +161,8 @@ export default function NovelReaderPage() {
               </div>
 
               {currentChapter.format === "pdf" && currentChapter.pdf_url ? (
-                <div
-                  className="no-select overflow-hidden rounded-lg border"
-                  onContextMenu={(e) => e.preventDefault()}
-                >
-                  <iframe
-                    src={`${currentChapter.pdf_url}#toolbar=0&navpanes=0`}
-                    className="h-[70vh] w-full"
-                    title={currentChapter.title}
-                  />
+                <div className="relative overflow-hidden rounded-lg bg-card md:border md:shadow-inner md:px-8 md:py-8">
+                  <RollingReader url={currentChapter.pdf_url} />
                 </div>
               ) : currentChapter.content ? (
                 <div className="prose prose-lg max-w-none font-serif dark:prose-invert">
