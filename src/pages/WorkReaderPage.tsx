@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 import { useWork } from "@/hooks/useWorks";
 import { HeartButton } from "@/components/HeartButton";
 import { CommentBox } from "@/components/CommentBox";
+import { SEOHead } from "@/components/SEOHead";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Clock, BookOpen } from "lucide-react";
 import { useEffect } from "react";
@@ -42,6 +43,12 @@ export default function WorkReaderPage() {
 
   return (
     <main className="container mx-auto max-w-3xl px-4 py-10">
+      <SEOHead
+        title={work.title}
+        description={work.description || undefined}
+        image={work.cover_image_url}
+      />
+
       <div className="mb-8 flex items-start gap-4">
         {work.cover_image_url && (
           <img src={work.cover_image_url} alt={work.title} className="h-36 w-24 rounded object-cover" />

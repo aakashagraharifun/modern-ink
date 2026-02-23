@@ -18,6 +18,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUploadPage from "./pages/admin/AdminUploadPage";
 import AdminCommentsPage from "./pages/admin/AdminCommentsPage";
 import AdminProfilePage from "./pages/admin/AdminProfilePage";
+import AdminChaptersPage from "./pages/admin/AdminChaptersPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -44,6 +45,7 @@ const App = () => (
             <Route path="/admin/upload" element={<ProtectedRoute><AdminUploadPage /></ProtectedRoute>} />
             <Route path="/admin/comments" element={<ProtectedRoute><AdminCommentsPage /></ProtectedRoute>} />
             <Route path="/admin/profile" element={<ProtectedRoute><AdminProfilePage /></ProtectedRoute>} />
+            <Route path="/admin/chapters/:workId" element={<ProtectedRoute><AdminChaptersPage /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
