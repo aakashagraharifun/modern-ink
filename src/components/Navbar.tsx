@@ -31,9 +31,9 @@ export function Navbar() {
               key={link.to}
               to={link.to}
               className={cn(
-                "rounded-md px-3 py-2 text-sm font-medium transition-all hover:bg-secondary",
+                "rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-secondary",
                 location.pathname === link.to
-                  ? "text-foreground font-bold underline underline-offset-4 bg-secondary/30"
+                  ? "text-foreground"
                   : "text-muted-foreground"
               )}
             >
@@ -67,9 +67,9 @@ export function Navbar() {
               to={link.to}
               onClick={() => setMobileOpen(false)}
               className={cn(
-                "block rounded-md px-3 py-2 text-sm font-medium transition-all hover:bg-secondary",
+                "block rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-secondary",
                 location.pathname === link.to
-                  ? "text-foreground font-bold underline underline-offset-4 bg-secondary/30"
+                  ? "text-foreground"
                   : "text-muted-foreground"
               )}
             >

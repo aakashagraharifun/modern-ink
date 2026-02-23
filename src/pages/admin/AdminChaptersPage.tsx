@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { ArrowLeft, Plus, Trash2, GripVertical } from "lucide-react";
+import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 
 export default function AdminChaptersPage() {
   const { workId } = useParams<{ workId: string }>();
@@ -39,7 +39,6 @@ export default function AdminChaptersPage() {
   const [content, setContent] = useState("");
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
-  const [draggedId, setDraggedId] = useState<string | null>(null);
 
   const nextNumber = (chapters?.length ?? 0) + 1;
 
@@ -96,37 +95,6 @@ export default function AdminChaptersPage() {
       toast.success("Chapter deleted");
       queryClient.invalidateQueries({ queryKey: ["admin_chapters", workId] });
     }
-  };
-
-  const handleDrop = async (targetId: string) => {
-    if (!draggedId || draggedId === targetId || !chapters) return;
-
-    const sourceIdx = chapters.findIndex((c) => c.id === draggedId);
-    const targetIdx = chapters.findIndex((c) => c.id === targetId);
-    if (sourceIdx === -1 || targetIdx === -1) return;
-
-    const newChapters = [...chapters];
-    const [removed] = newChapters.splice(sourceIdx, 1);
-    newChapters.splice(targetIdx, 0, removed);
-
-    const updates = newChapters.map((c, idx) => ({ id: c.id, chapter_number: idx + 1 }));
-
-    try {
-      // Optimistic update
-      queryClient.setQueryData(
-        ["admin_chapters", workId],
-        newChapters.map((c, idx) => ({ ...c, chapter_number: idx + 1 }))
-      );
-
-      await Promise.all(
-        updates.map((u) => supabase.from("chapters").update({ chapter_number: u.chapter_number }).eq("id", u.id))
-      );
-      toast.success("Order updated");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to update order");
-      queryClient.invalidateQueries({ queryKey: ["admin_chapters", workId] });
-    }
-    setDraggedId(null);
   };
 
   return (
@@ -197,7 +165,6 @@ export default function AdminChaptersPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-12"></TableHead>
                 <TableHead>#</TableHead>
                 <TableHead>Title</TableHead>
                 <TableHead>Format</TableHead>
@@ -208,19 +175,7 @@ export default function AdminChaptersPage() {
             </TableHeader>
             <TableBody>
               {chapters.map((ch) => (
-                <TableRow
-                  key={ch.id}
-                  draggable
-                  onDragStart={() => setDraggedId(ch.id)}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={() => handleDrop(ch.id)}
-                  className={draggedId === ch.id ? "opacity-50" : ""}
-                >
-                  <TableCell>
-                    <div className="cursor-grab hover:text-foreground text-muted-foreground active:cursor-grabbing p-1">
-                      <GripVertical className="h-4 w-4" />
-                    </div>
-                  </TableCell>
+                <TableRow key={ch.id}>
                   <TableCell>{ch.chapter_number}</TableCell>
                   <TableCell className="font-medium">{ch.title}</TableCell>
                   <TableCell className="uppercase text-xs">{ch.format}</TableCell>

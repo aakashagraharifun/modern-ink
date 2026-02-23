@@ -7,7 +7,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Clock, BookOpen } from "lucide-react";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { RollingReader } from "@/components/RollingReader";
 
 function estimateReadTime(wordCount: number): string {
   const minutes = Math.max(1, Math.ceil(wordCount / 200));
@@ -70,8 +69,12 @@ export default function WorkReaderPage() {
       </div>
 
       {work.format === "pdf" && work.pdf_url ? (
-        <div className="relative mb-8 overflow-hidden rounded-lg bg-card md:border md:shadow-inner md:px-8 md:py-8">
-          <RollingReader url={work.pdf_url} />
+        <div className="no-select mb-8 overflow-hidden rounded-lg border" onContextMenu={(e) => e.preventDefault()}>
+          <iframe
+            src={`${work.pdf_url}#toolbar=0&navpanes=0`}
+            className="h-[70vh] w-full"
+            title={work.title}
+          />
         </div>
       ) : work.content ? (
         <div className="prose prose-lg mb-8 max-w-none font-serif dark:prose-invert">

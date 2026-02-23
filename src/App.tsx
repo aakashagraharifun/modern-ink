@@ -20,7 +20,6 @@ import AdminCommentsPage from "./pages/admin/AdminCommentsPage";
 import AdminProfilePage from "./pages/admin/AdminProfilePage";
 import AdminChaptersPage from "./pages/admin/AdminChaptersPage";
 import NotFound from "./pages/NotFound";
-import { AnimatedRoutes } from "./components/AnimatedRoutes";
 
 const queryClient = new QueryClient();
 
@@ -32,7 +31,23 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Navbar />
-          <AnimatedRoutes />
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/novels" element={<NovelsPage />} />
+            <Route path="/stories" element={<StoriesPage />} />
+            <Route path="/poems" element={<PoemsPage />} />
+            <Route path="/novels/:id" element={<NovelReaderPage />} />
+            <Route path="/stories/:id" element={<WorkReaderPage />} />
+            <Route path="/poems/:id" element={<WorkReaderPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/admin" element={<AdminLoginPage />} />
+            <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+            <Route path="/admin/upload" element={<ProtectedRoute><AdminUploadPage /></ProtectedRoute>} />
+            <Route path="/admin/comments" element={<ProtectedRoute><AdminCommentsPage /></ProtectedRoute>} />
+            <Route path="/admin/profile" element={<ProtectedRoute><AdminProfilePage /></ProtectedRoute>} />
+            <Route path="/admin/chapters/:workId" element={<ProtectedRoute><AdminChaptersPage /></ProtectedRoute>} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
