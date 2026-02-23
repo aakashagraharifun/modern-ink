@@ -2,12 +2,14 @@ import { useParams } from "react-router-dom";
 import { useWork, useChapters } from "@/hooks/useWorks";
 import { HeartButton } from "@/components/HeartButton";
 import { CommentBox } from "@/components/CommentBox";
+import { SEOHead } from "@/components/SEOHead";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { Menu, BookOpen } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function NovelReaderPage() {
   const { id } = useParams<{ id: string }>();
@@ -35,6 +37,34 @@ export default function NovelReaderPage() {
       localStorage.setItem(progressKey, selectedChapter);
     }
   }, [selectedChapter, progressKey]);
+
+  // Track chapter view
+  useEffect(() => {
+    if (selectedChapter) {
+      const viewedKey = `viewed_chapter_${selectedChapter}`;
+      if (!sessionStorage.getItem(viewedKey)) {
+        sessionStorage.setItem(viewedKey, "1");
+        const chapter = chapters?.find((c) => c.id === selectedChapter);
+        if (chapter) {
+          supabase
+            .from("chapters")
+            .update({ view_count: chapter.view_count + 1 })
+            .eq("id", selectedChapter);
+        }
+      }
+    }
+  }, [selectedChapter, chapters]);
+
+  // Track novel view
+  useEffect(() => {
+    if (work) {
+      const viewedKey = `viewed_${work.id}`;
+      if (!sessionStorage.getItem(viewedKey)) {
+        sessionStorage.setItem(viewedKey, "1");
+        supabase.from("works").update({ view_count: work.view_count + 1 }).eq("id", work.id);
+      }
+    }
+  }, [work]);
 
   const currentChapter = chapters?.find((c) => c.id === selectedChapter);
 
@@ -73,6 +103,12 @@ export default function NovelReaderPage() {
 
   return (
     <main className="container mx-auto px-4 py-6">
+      <SEOHead
+        title={currentChapter ? `${work.title} — Ch. ${currentChapter.chapter_number}` : work.title}
+        description={work.description || undefined}
+        image={work.cover_image_url}
+      />
+
       <div className="mb-6 flex items-start gap-4">
         {work.cover_image_url && (
           <img src={work.cover_image_url} alt={work.title} className="h-28 w-20 rounded object-cover" />

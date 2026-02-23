@@ -110,7 +110,13 @@ export default function AdminDashboard() {
             <TableBody>
               {works?.map((w) => (
                 <TableRow key={w.id}>
-                  <TableCell className="font-medium">{w.title}</TableCell>
+                  <TableCell className="font-medium">
+                    {w.type === "novel" ? (
+                      <Link to={`/admin/chapters/${w.id}`} className="text-accent hover:underline">{w.title}</Link>
+                    ) : (
+                      w.title
+                    )}
+                  </TableCell>
                   <TableCell className="capitalize">{w.type}</TableCell>
                   <TableCell className="text-right">{w.view_count}</TableCell>
                   <TableCell className="text-right">{w.like_count}</TableCell>
