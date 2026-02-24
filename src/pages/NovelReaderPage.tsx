@@ -3,6 +3,7 @@ import { useWork, useChapters } from "@/hooks/useWorks";
 import { HeartButton } from "@/components/HeartButton";
 import { CommentBox } from "@/components/CommentBox";
 import { SEOHead } from "@/components/SEOHead";
+import { RollingPdfViewer } from "@/components/RollingPdfViewer";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
@@ -160,16 +161,7 @@ export default function NovelReaderPage() {
               </div>
 
               {currentChapter.format === "pdf" && currentChapter.pdf_url ? (
-                <div
-                  className="no-select overflow-hidden rounded-lg border"
-                  onContextMenu={(e) => e.preventDefault()}
-                >
-                  <iframe
-                    src={`${currentChapter.pdf_url}#toolbar=0&navpanes=0`}
-                    className="h-[70vh] w-full"
-                    title={currentChapter.title}
-                  />
-                </div>
+                <RollingPdfViewer url={currentChapter.pdf_url} title={currentChapter.title} />
               ) : currentChapter.content ? (
                 <div className="prose prose-lg max-w-none font-serif dark:prose-invert">
                   {currentChapter.content.split("\n").map((p, i) => (
