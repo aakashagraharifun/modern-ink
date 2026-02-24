@@ -32,8 +32,8 @@ export function Navbar() {
               to={link.to}
               className={cn(
                 "rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-secondary",
-                location.pathname === link.to
-                  ? "text-foreground"
+                (link.to === "/" ? location.pathname === "/" : location.pathname.startsWith(link.to))
+                  ? "text-foreground font-semibold border-b-2 border-accent"
                   : "text-muted-foreground"
               )}
             >
@@ -68,8 +68,8 @@ export function Navbar() {
               onClick={() => setMobileOpen(false)}
               className={cn(
                 "block rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-secondary",
-                location.pathname === link.to
-                  ? "text-foreground"
+                (link.to === "/" ? location.pathname === "/" : location.pathname.startsWith(link.to))
+                  ? "text-foreground font-semibold bg-secondary"
                   : "text-muted-foreground"
               )}
             >

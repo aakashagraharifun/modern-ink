@@ -106,3 +106,19 @@
     -webkit-user-select: none;
   }
 }
+
+/* Print protection — hide everything when printing */
+@media print {
+  body {
+    display: none !important;
+  }
+}
+
+/* react-pdf page styling */
+.react-pdf__Page {
+  margin-bottom: 2px;
+}
+.react-pdf__Page canvas {
+  max-width: 100% !important;
+  height: auto !important;
+}

@@ -3,6 +3,7 @@ import { useWork } from "@/hooks/useWorks";
 import { HeartButton } from "@/components/HeartButton";
 import { CommentBox } from "@/components/CommentBox";
 import { SEOHead } from "@/components/SEOHead";
+import { RollingPdfViewer } from "@/components/RollingPdfViewer";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Clock, BookOpen } from "lucide-react";
 import { useEffect } from "react";
@@ -69,12 +70,8 @@ export default function WorkReaderPage() {
       </div>
 
       {work.format === "pdf" && work.pdf_url ? (
-        <div className="no-select mb-8 overflow-hidden rounded-lg border" onContextMenu={(e) => e.preventDefault()}>
-          <iframe
-            src={`${work.pdf_url}#toolbar=0&navpanes=0`}
-            className="h-[70vh] w-full"
-            title={work.title}
-          />
+        <div className="mb-8">
+          <RollingPdfViewer url={work.pdf_url} title={work.title} />
         </div>
       ) : work.content ? (
         <div className="prose prose-lg mb-8 max-w-none font-serif dark:prose-invert">
