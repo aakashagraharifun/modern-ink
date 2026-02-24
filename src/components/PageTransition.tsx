@@ -8,7 +8,6 @@ export function PageTransition({ children }: { children: ReactNode }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 8 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
-      className="min-h-screen"
     >
       {children}
     </motion.div>

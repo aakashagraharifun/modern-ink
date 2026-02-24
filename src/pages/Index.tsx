@@ -14,7 +14,7 @@ const Index = () => {
   const poems = works?.filter((w) => w.type === "poem" && !w.is_pinned) ?? [];
 
   return (
-    <main className="min-h-screen overflow-y-auto">
+    <main className="min-h-screen">
       {/* Hero */}
       <section className="container mx-auto px-4 py-20 text-center md:py-28">
         <motion.h1
