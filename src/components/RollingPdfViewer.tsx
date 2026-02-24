@@ -126,13 +126,7 @@ export function RollingPdfViewer({ url, title }: RollingPdfViewerProps) {
               WebkitOverflowScrolling: "touch",
             }}
           >
-            {/* Shield overlay */}
-            <div
-              className="pointer-events-auto absolute inset-0 z-10"
-              style={{ touchAction: "pan-y pinch-zoom" }}
-            />
-
-            <div ref={containerRef} className="relative z-0 mx-auto w-full md:max-w-4xl">
+            <div ref={containerRef} className="relative mx-auto w-full md:max-w-4xl">
               <PdfDocument width={containerWidth} />
             </div>
           </div>
