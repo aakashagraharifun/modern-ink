@@ -8,20 +8,23 @@ import { AnimatePresence } from "framer-motion";
 import { Navbar } from "@/components/Navbar";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PageTransition } from "@/components/PageTransition";
-import Index from "./pages/Index";
-import NovelsPage from "./pages/NovelsPage";
-import StoriesPage from "./pages/StoriesPage";
-import PoemsPage from "./pages/PoemsPage";
-import NovelReaderPage from "./pages/NovelReaderPage";
-import WorkReaderPage from "./pages/WorkReaderPage";
-import AboutPage from "./pages/AboutPage";
-import AdminLoginPage from "./pages/AdminLoginPage";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminUploadPage from "./pages/admin/AdminUploadPage";
-import AdminCommentsPage from "./pages/admin/AdminCommentsPage";
-import AdminProfilePage from "./pages/admin/AdminProfilePage";
-import AdminChaptersPage from "./pages/admin/AdminChaptersPage";
-import NotFound from "./pages/NotFound";
+import { lazy, Suspense } from "react";
+
+// Lazy-loaded routes for code splitting
+const Index = lazy(() => import("./pages/Index"));
+const NovelsPage = lazy(() => import("./pages/NovelsPage"));
+const StoriesPage = lazy(() => import("./pages/StoriesPage"));
+const PoemsPage = lazy(() => import("./pages/PoemsPage"));
+const NovelReaderPage = lazy(() => import("./pages/NovelReaderPage"));
+const WorkReaderPage = lazy(() => import("./pages/WorkReaderPage"));
+const AboutPage = lazy(() => import("./pages/AboutPage"));
+const AdminLoginPage = lazy(() => import("./pages/AdminLoginPage"));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const AdminUploadPage = lazy(() => import("./pages/admin/AdminUploadPage"));
+const AdminCommentsPage = lazy(() => import("./pages/admin/AdminCommentsPage"));
+const AdminProfilePage = lazy(() => import("./pages/admin/AdminProfilePage"));
+const AdminChaptersPage = lazy(() => import("./pages/admin/AdminChaptersPage"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
 
@@ -30,23 +33,25 @@ function AnimatedRoutes() {
   return (
     <AnimatePresence mode="wait">
       <PageTransition key={location.pathname}>
-        <Routes location={location}>
-          <Route path="/" element={<Index />} />
-          <Route path="/novels" element={<NovelsPage />} />
-          <Route path="/stories" element={<StoriesPage />} />
-          <Route path="/poems" element={<PoemsPage />} />
-          <Route path="/novels/:id" element={<NovelReaderPage />} />
-          <Route path="/stories/:id" element={<WorkReaderPage />} />
-          <Route path="/poems/:id" element={<WorkReaderPage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/admin" element={<AdminLoginPage />} />
-          <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-          <Route path="/admin/upload" element={<ProtectedRoute><AdminUploadPage /></ProtectedRoute>} />
-          <Route path="/admin/comments" element={<ProtectedRoute><AdminCommentsPage /></ProtectedRoute>} />
-          <Route path="/admin/profile" element={<ProtectedRoute><AdminProfilePage /></ProtectedRoute>} />
-          <Route path="/admin/chapters/:workId" element={<ProtectedRoute><AdminChaptersPage /></ProtectedRoute>} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <Suspense fallback={<div className="flex min-h-[60vh] items-center justify-center text-muted-foreground">Loading…</div>}>
+          <Routes location={location}>
+            <Route path="/" element={<Index />} />
+            <Route path="/novels" element={<NovelsPage />} />
+            <Route path="/stories" element={<StoriesPage />} />
+            <Route path="/poems" element={<PoemsPage />} />
+            <Route path="/novels/:id" element={<NovelReaderPage />} />
+            <Route path="/stories/:id" element={<WorkReaderPage />} />
+            <Route path="/poems/:id" element={<WorkReaderPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/admin" element={<AdminLoginPage />} />
+            <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+            <Route path="/admin/upload" element={<ProtectedRoute><AdminUploadPage /></ProtectedRoute>} />
+            <Route path="/admin/comments" element={<ProtectedRoute><AdminCommentsPage /></ProtectedRoute>} />
+            <Route path="/admin/profile" element={<ProtectedRoute><AdminProfilePage /></ProtectedRoute>} />
+            <Route path="/admin/chapters/:workId" element={<ProtectedRoute><AdminChaptersPage /></ProtectedRoute>} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
       </PageTransition>
     </AnimatePresence>
   );

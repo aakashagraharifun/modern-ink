@@ -28,6 +28,16 @@ export default function AdminUploadPage() {
     if (!title.trim()) return;
     setLoading(true);
 
+    // Refresh session silently before upload to prevent stale token issues
+    try {
+      await supabase.auth.refreshSession();
+    } catch {}
+
+    // Show slow connection feedback after 10s
+    const slowTimer = setTimeout(() => {
+      toast.info("Connection slow, still trying...");
+    }, 10000);
+
     try {
       let coverUrl: string | null = null;
       let pdfUrl: string | null = null;
@@ -71,14 +81,15 @@ export default function AdminUploadPage() {
       toast.success("Work uploaded!");
       navigate("/admin/dashboard");
     } catch (err: any) {
-      toast.error(err.message || "Upload failed");
+      toast.error(err.message || "Upload failed. Please try again.");
     } finally {
+      clearTimeout(slowTimer);
       setLoading(false);
     }
   };
 
   return (
-    <main className="container mx-auto max-w-xl px-4 py-8">
+    <main className="container mx-auto max-w-xl px-4 py-8 max-h-screen overflow-y-auto">
       <Link to="/admin/dashboard" className="mb-6 flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4" /> Back to Dashboard
       </Link>

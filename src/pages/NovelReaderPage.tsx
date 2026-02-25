@@ -163,10 +163,8 @@ export default function NovelReaderPage() {
               {currentChapter.format === "pdf" && currentChapter.pdf_url ? (
                 <RollingPdfViewer url={currentChapter.pdf_url} title={currentChapter.title} />
               ) : currentChapter.content ? (
-                <div className="prose prose-lg max-w-none font-serif dark:prose-invert">
-                  {currentChapter.content.split("\n").map((p, i) => (
-                    <p key={i}>{p}</p>
-                  ))}
+                <div className="max-w-none font-serif text-lg leading-relaxed text-foreground" style={{ whiteSpace: "pre-wrap" }}>
+                  {currentChapter.content}
                 </div>
               ) : (
                 <div className="flex items-center gap-2 text-muted-foreground">

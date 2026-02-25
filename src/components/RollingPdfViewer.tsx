@@ -5,7 +5,6 @@ import "react-pdf/dist/esm/Page/TextLayer.css";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { X, BookOpen } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -105,8 +104,8 @@ export function RollingPdfViewer({ url, title }: RollingPdfViewerProps) {
           className="fixed inset-0 z-50 flex flex-col bg-background"
           style={{ height: "100dvh" }}
         >
-          {/* Header */}
-          <div className="flex shrink-0 items-center justify-between border-b bg-background px-4 py-2">
+          {/* Header - highest z-index, always clickable */}
+          <div className="relative z-[60] flex shrink-0 items-center justify-between border-b bg-background px-4 py-2">
             <span className="truncate font-serif text-sm font-medium text-foreground">
               {title || "PDF Reader"}
             </span>
@@ -116,23 +115,16 @@ export function RollingPdfViewer({ url, title }: RollingPdfViewerProps) {
             </Button>
           </div>
 
-          {/* Scrollable PDF area */}
+          {/* Scrollable PDF area - independent scroll context */}
           <div
-            className="no-select flex-1 overflow-y-auto overscroll-contain"
+            className="no-select relative flex-1 overflow-y-auto overscroll-contain"
             onContextMenu={(e) => e.preventDefault()}
             style={{
-              WebkitTouchCallout: "none",
-              touchAction: "pan-y pinch-zoom",
               WebkitOverflowScrolling: "touch",
+              touchAction: "pan-y pinch-zoom",
             }}
           >
-            {/* Shield overlay */}
-            <div
-              className="pointer-events-auto absolute inset-0 z-10"
-              style={{ touchAction: "pan-y pinch-zoom" }}
-            />
-
-            <div ref={containerRef} className="relative z-0 mx-auto w-full md:max-w-4xl">
+            <div ref={containerRef} className="mx-auto w-full md:max-w-4xl">
               <PdfDocument width={containerWidth} />
             </div>
           </div>
