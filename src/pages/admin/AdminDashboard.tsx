@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Eye, Heart, MessageSquare, Plus, LogOut, Pencil, Trash2 } from "lucide-react";
+import { Eye, Heart, MessageSquare, Plus, LogOut, Pencil, Trash2, Settings } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { AdminEditWorkDialog } from "@/components/AdminEditWorkDialog";
@@ -74,6 +74,9 @@ export default function AdminDashboard() {
           </Button>
           <Button asChild variant="outline" size="sm">
             <Link to="/admin/profile">Author Profile</Link>
+          </Button>
+          <Button asChild variant="outline" size="sm">
+            <Link to="/admin/settings"><Settings className="mr-1 h-4 w-4" /> Settings</Link>
           </Button>
           <Button variant="ghost" size="sm" onClick={handleLogout}>
             <LogOut className="mr-1 h-4 w-4" /> Logout

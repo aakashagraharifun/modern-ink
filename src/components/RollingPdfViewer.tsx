@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
@@ -17,6 +17,8 @@ export function RollingPdfViewer({ url, title }: RollingPdfViewerProps) {
   const [numPages, setNumPages] = useState<number>(0);
   const [containerWidth, setContainerWidth] = useState<number>(800);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const onDocumentLoadSuccess = useCallback(({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
@@ -34,8 +36,17 @@ export function RollingPdfViewer({ url, title }: RollingPdfViewerProps) {
     }
   }, []);
 
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const { scrollTop, scrollHeight, clientHeight } = el;
+    const max = scrollHeight - clientHeight;
+    setScrollProgress(max > 0 ? (scrollTop / max) * 100 : 0);
+  }, []);
+
   const openFullscreen = () => {
     setIsFullscreen(true);
+    setScrollProgress(0);
     document.body.style.overflow = "hidden";
   };
 
@@ -104,6 +115,14 @@ export function RollingPdfViewer({ url, title }: RollingPdfViewerProps) {
           className="fixed inset-0 z-50 flex flex-col bg-background"
           style={{ height: "100dvh" }}
         >
+          {/* Reading progress bar */}
+          <div className="relative z-[70] h-1 w-full bg-muted">
+            <div
+              className="h-full bg-primary transition-[width] duration-150 ease-out"
+              style={{ width: `${scrollProgress}%` }}
+            />
+          </div>
+
           {/* Header - highest z-index, always clickable */}
           <div className="relative z-[60] flex shrink-0 items-center justify-between border-b bg-background px-4 py-2">
             <span className="truncate font-serif text-sm font-medium text-foreground">
@@ -117,7 +136,9 @@ export function RollingPdfViewer({ url, title }: RollingPdfViewerProps) {
 
           {/* Scrollable PDF area - independent scroll context */}
           <div
+            ref={scrollRef}
             className="no-select relative flex-1 overflow-y-auto overscroll-contain"
+            onScroll={handleScroll}
             onContextMenu={(e) => e.preventDefault()}
             style={{
               WebkitOverflowScrolling: "touch",
