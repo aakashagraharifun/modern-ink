@@ -74,10 +74,8 @@ export default function WorkReaderPage() {
           <RollingPdfViewer url={work.pdf_url} title={work.title} />
         </div>
       ) : work.content ? (
-        <div className="prose prose-lg mb-8 max-w-none font-serif dark:prose-invert">
-          {work.content.split("\n").map((p, i) => (
-            <p key={i}>{p}</p>
-          ))}
+      <div className="mb-8 max-w-none font-serif text-lg leading-relaxed text-foreground" style={{ whiteSpace: "pre-wrap" }}>
+          {work.content}
         </div>
       ) : (
         <div className="mb-8 flex items-center gap-2 text-muted-foreground">
