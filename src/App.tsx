@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { AnimatePresence } from "framer-motion";
 import { Navbar } from "@/components/Navbar";
+import { BackButton } from "@/components/BackButton";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PageTransition } from "@/components/PageTransition";
 import { lazy, Suspense } from "react";
@@ -67,6 +68,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Navbar />
+          <BackButton />
           <AnimatedRoutes />
         </BrowserRouter>
       </TooltipProvider>
