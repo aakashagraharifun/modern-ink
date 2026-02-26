@@ -16,6 +16,7 @@ export default function AdminProfilePage() {
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
   const [instagram, setInstagram] = useState("");
+  const [email, setEmail] = useState("");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -24,6 +25,8 @@ export default function AdminProfilePage() {
       setName(author.name);
       setBio(author.bio || "");
       setInstagram(author.instagram_handle || "");
+      const links = (author.social_links as Record<string, string>) ?? {};
+      setEmail(links.email || links.Email || "");
     }
   }, [author]);
 
@@ -41,6 +44,10 @@ export default function AdminProfilePage() {
         photoUrl = data.publicUrl;
       }
 
+      const existingLinks = (author.social_links as Record<string, string>) ?? {};
+      const updatedLinks = { ...existingLinks, email: email || undefined };
+      if (!email) delete updatedLinks.email;
+
       const { error } = await supabase
         .from("author_profile")
         .update({
@@ -48,6 +55,7 @@ export default function AdminProfilePage() {
           bio,
           instagram_handle: instagram,
           photo_url: photoUrl,
+          social_links: updatedLinks as any,
         })
         .eq("id", author.id);
 
@@ -82,6 +90,11 @@ export default function AdminProfilePage() {
         <div className="space-y-2">
           <Label>Instagram Handle</Label>
           <Input value={instagram} onChange={(e) => setInstagram(e.target.value)} placeholder="@username" />
+        </div>
+        <div className="space-y-2">
+          <Label>Email Address</Label>
+          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="author@example.com" />
+          <p className="text-xs text-muted-foreground">Displayed on the About page for readers to contact you.</p>
         </div>
         <div className="space-y-2">
           <Label>Author Photo</Label>

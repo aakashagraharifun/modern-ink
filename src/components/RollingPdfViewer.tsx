@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useMemo, memo } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
@@ -13,11 +13,36 @@ interface RollingPdfViewerProps {
   title?: string;
 }
 
+/** Memoized PDF pages so scroll-driven state changes don't re-render them */
+const MemoizedPages = memo(function MemoizedPages({
+  numPages,
+  width,
+}: {
+  numPages: number;
+  width: number;
+}) {
+  return (
+    <>
+      {Array.from({ length: numPages }).map((_, i) => (
+        <Page
+          key={i}
+          pageNumber={i + 1}
+          width={width}
+          className="mx-auto mb-1"
+          renderTextLayer={false}
+          renderAnnotationLayer={false}
+        />
+      ))}
+    </>
+  );
+});
+
 export function RollingPdfViewer({ url, title }: RollingPdfViewerProps) {
   const [numPages, setNumPages] = useState<number>(0);
   const [containerWidth, setContainerWidth] = useState<number>(800);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
+  const scrollProgressRef = useRef(0);
+  const progressBarRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const onDocumentLoadSuccess = useCallback(({ numPages }: { numPages: number }) => {
@@ -36,53 +61,53 @@ export function RollingPdfViewer({ url, title }: RollingPdfViewerProps) {
     }
   }, []);
 
+  // Use ref + direct DOM update to avoid re-renders on scroll
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
-    if (!el) return;
+    if (!el || !progressBarRef.current) return;
     const { scrollTop, scrollHeight, clientHeight } = el;
     const max = scrollHeight - clientHeight;
-    setScrollProgress(max > 0 ? (scrollTop / max) * 100 : 0);
+    const pct = max > 0 ? (scrollTop / max) * 100 : 0;
+    scrollProgressRef.current = pct;
+    progressBarRef.current.style.width = `${pct}%`;
   }, []);
 
   const openFullscreen = () => {
     setIsFullscreen(true);
-    setScrollProgress(0);
     document.body.style.overflow = "hidden";
   };
 
-  const closeFullscreen = () => {
+  const closeFullscreen = useCallback(() => {
     setIsFullscreen(false);
+    // Restore body scroll reliably
     document.body.style.overflow = "";
-  };
+    document.body.style.position = "";
+    document.body.style.top = "";
+    document.body.style.width = "";
+    document.documentElement.style.overflow = "";
+    // Force reflow
+    window.scrollTo(0, window.scrollY);
+  }, []);
 
-  const PdfDocument = ({ width }: { width: number }) => (
-    <Document
-      file={url}
-      onLoadSuccess={onDocumentLoadSuccess}
-      loading={
-        <div className="space-y-4 p-4">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-[60vh] w-full" />
-          ))}
-        </div>
-      }
-      error={
-        <div className="p-8 text-center text-muted-foreground">
-          Failed to load PDF. Please try again.
-        </div>
-      }
-    >
-      {Array.from({ length: numPages }).map((_, i) => (
-        <Page
-          key={i}
-          pageNumber={i + 1}
-          width={width}
-          className="mx-auto mb-1"
-          renderTextLayer={false}
-          renderAnnotationLayer={false}
-        />
-      ))}
-    </Document>
+  // Memoize the loading/error elements
+  const loadingEl = useMemo(
+    () => (
+      <div className="space-y-4 p-4">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Skeleton key={i} className="h-[60vh] w-full" />
+        ))}
+      </div>
+    ),
+    []
+  );
+
+  const errorEl = useMemo(
+    () => (
+      <div className="p-8 text-center text-muted-foreground">
+        Failed to load PDF. Please try again.
+      </div>
+    ),
+    []
   );
 
   return (
@@ -94,7 +119,14 @@ export function RollingPdfViewer({ url, title }: RollingPdfViewerProps) {
         onContextMenu={(e) => e.preventDefault()}
       >
         <div ref={containerRef}>
-          <PdfDocument width={containerWidth} />
+          <Document
+            file={url}
+            onLoadSuccess={onDocumentLoadSuccess}
+            loading={loadingEl}
+            error={errorEl}
+          >
+            <MemoizedPages numPages={numPages} width={containerWidth} />
+          </Document>
         </div>
 
         {/* Fade overlay */}
@@ -115,15 +147,16 @@ export function RollingPdfViewer({ url, title }: RollingPdfViewerProps) {
           className="fixed inset-0 z-50 flex flex-col bg-background"
           style={{ height: "100dvh" }}
         >
-          {/* Reading progress bar */}
+          {/* Reading progress bar - no state, direct DOM */}
           <div className="relative z-[70] h-1 w-full bg-muted">
             <div
-              className="h-full bg-primary transition-[width] duration-150 ease-out"
-              style={{ width: `${scrollProgress}%` }}
+              ref={progressBarRef}
+              className="h-full bg-primary transition-none"
+              style={{ width: "0%" }}
             />
           </div>
 
-          {/* Header - highest z-index, always clickable */}
+          {/* Header */}
           <div className="relative z-[60] flex shrink-0 items-center justify-between border-b bg-background px-4 py-2">
             <span className="truncate font-serif text-sm font-medium text-foreground">
               {title || "PDF Reader"}
@@ -134,7 +167,7 @@ export function RollingPdfViewer({ url, title }: RollingPdfViewerProps) {
             </Button>
           </div>
 
-          {/* Scrollable PDF area - independent scroll context */}
+          {/* Scrollable PDF area */}
           <div
             ref={scrollRef}
             className="no-select relative flex-1 overflow-y-auto overscroll-contain"
@@ -146,7 +179,14 @@ export function RollingPdfViewer({ url, title }: RollingPdfViewerProps) {
             }}
           >
             <div ref={containerRef} className="mx-auto w-full md:max-w-4xl">
-              <PdfDocument width={containerWidth} />
+              <Document
+                file={url}
+                onLoadSuccess={onDocumentLoadSuccess}
+                loading={loadingEl}
+                error={errorEl}
+              >
+                <MemoizedPages numPages={numPages} width={containerWidth} />
+              </Document>
             </div>
           </div>
         </div>

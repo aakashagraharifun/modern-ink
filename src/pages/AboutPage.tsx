@@ -1,6 +1,6 @@
 import { useAuthorProfile } from "@/hooks/useWorks";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Instagram } from "lucide-react";
+import { Instagram, Mail } from "lucide-react";
 
 export default function AboutPage() {
   const { data: author, isLoading } = useAuthorProfile();
@@ -21,6 +21,7 @@ export default function AboutPage() {
 
   const journey = (author.writing_journey as Array<{ year: string; milestone: string }>) ?? [];
   const socialLinks = (author.social_links as Record<string, string>) ?? {};
+  const email = socialLinks.email || socialLinks.Email || null;
 
   return (
     <main className="container mx-auto max-w-2xl px-4 py-10">
@@ -46,8 +47,8 @@ export default function AboutPage() {
         </div>
       )}
 
-      {/* Social Links */}
-      <div className="mb-10 flex justify-center gap-4">
+      {/* Social Links & Email */}
+      <div className="mb-10 flex flex-wrap justify-center gap-4">
         {author.instagram_handle && (
           <a
             href={`https://instagram.com/${author.instagram_handle.replace("@", "")}`}
@@ -59,17 +60,28 @@ export default function AboutPage() {
             @{author.instagram_handle.replace("@", "")}
           </a>
         )}
-        {Object.entries(socialLinks).map(([name, url]) => (
+        {email && (
           <a
-            key={name}
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-md border px-4 py-2 text-sm transition-colors hover:bg-secondary"
+            href={`mailto:${email}`}
+            className="flex items-center gap-2 rounded-md border px-4 py-2 text-sm transition-colors hover:bg-secondary"
           >
-            {name}
+            <Mail className="h-4 w-4" />
+            {email}
           </a>
-        ))}
+        )}
+        {Object.entries(socialLinks)
+          .filter(([name]) => name.toLowerCase() !== "email")
+          .map(([name, url]) => (
+            <a
+              key={name}
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-md border px-4 py-2 text-sm transition-colors hover:bg-secondary"
+            >
+              {name}
+            </a>
+          ))}
       </div>
 
       {/* Writing Journey */}
