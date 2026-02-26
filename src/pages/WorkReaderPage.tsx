@@ -5,8 +5,9 @@ import { CommentBox } from "@/components/CommentBox";
 import { SEOHead } from "@/components/SEOHead";
 import { RollingPdfViewer } from "@/components/RollingPdfViewer";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Clock, BookOpen } from "lucide-react";
-import { useEffect } from "react";
+import { Slider } from "@/components/ui/slider";
+import { Clock, BookOpen, Type } from "lucide-react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 function estimateReadTime(wordCount: number): string {
@@ -17,6 +18,7 @@ function estimateReadTime(wordCount: number): string {
 export default function WorkReaderPage() {
   const { id } = useParams<{ id: string }>();
   const { data: work, isLoading } = useWork(id!);
+  const [fontSize, setFontSize] = useState(18);
 
   // Track view
   useEffect(() => {
@@ -41,6 +43,8 @@ export default function WorkReaderPage() {
   if (!work) {
     return <div className="container mx-auto px-4 py-10 text-muted-foreground">Work not found.</div>;
   }
+
+  const isTextContent = work.format !== "pdf" && !!work.content;
 
   return (
     <main className="container mx-auto max-w-3xl px-4 py-10">
@@ -69,12 +73,32 @@ export default function WorkReaderPage() {
         </div>
       </div>
 
+      {/* Font size control for text content */}
+      {isTextContent && (
+        <div className="mb-4 flex items-center gap-3">
+          <Type className="h-4 w-4 text-muted-foreground" />
+          <span className="text-xs text-muted-foreground">Aa</span>
+          <Slider
+            value={[fontSize]}
+            onValueChange={([v]) => setFontSize(v)}
+            min={14}
+            max={28}
+            step={1}
+            className="w-32"
+          />
+          <span className="text-sm text-muted-foreground">Aa</span>
+        </div>
+      )}
+
       {work.format === "pdf" && work.pdf_url ? (
         <div className="mb-8">
           <RollingPdfViewer url={work.pdf_url} title={work.title} />
         </div>
       ) : work.content ? (
-      <div className="mb-8 max-w-none font-serif text-lg leading-relaxed text-foreground" style={{ whiteSpace: "pre-wrap" }}>
+        <div
+          className="mb-8 max-w-none font-serif leading-relaxed text-foreground"
+          style={{ whiteSpace: "pre-wrap", fontSize: `${fontSize}px` }}
+        >
           {work.content}
         </div>
       ) : (

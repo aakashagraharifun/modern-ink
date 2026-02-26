@@ -7,7 +7,8 @@ import { RollingPdfViewer } from "@/components/RollingPdfViewer";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
-import { Menu, BookOpen } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import { Menu, BookOpen, Type } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,6 +20,7 @@ export default function NovelReaderPage() {
 
   const progressKey = `novel_progress_${id}`;
   const [selectedChapter, setSelectedChapter] = useState<string | null>(null);
+  const [fontSize, setFontSize] = useState(18);
 
   // Load reading progress
   useEffect(() => {
@@ -68,6 +70,7 @@ export default function NovelReaderPage() {
   }, [work]);
 
   const currentChapter = chapters?.find((c) => c.id === selectedChapter);
+  const isTextContent = currentChapter && currentChapter.format !== "pdf" && !!currentChapter.content;
 
   if (workLoading) {
     return (
@@ -160,10 +163,30 @@ export default function NovelReaderPage() {
                 <HeartButton table="chapters" id={currentChapter.id} initialCount={currentChapter.like_count} />
               </div>
 
+              {/* Font size control for text content */}
+              {isTextContent && (
+                <div className="flex items-center gap-3">
+                  <Type className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">Aa</span>
+                  <Slider
+                    value={[fontSize]}
+                    onValueChange={([v]) => setFontSize(v)}
+                    min={14}
+                    max={28}
+                    step={1}
+                    className="w-32"
+                  />
+                  <span className="text-sm text-muted-foreground">Aa</span>
+                </div>
+              )}
+
               {currentChapter.format === "pdf" && currentChapter.pdf_url ? (
                 <RollingPdfViewer url={currentChapter.pdf_url} title={currentChapter.title} />
               ) : currentChapter.content ? (
-                <div className="max-w-none font-serif text-lg leading-relaxed text-foreground" style={{ whiteSpace: "pre-wrap" }}>
+                <div
+                  className="max-w-none font-serif leading-relaxed text-foreground"
+                  style={{ whiteSpace: "pre-wrap", fontSize: `${fontSize}px` }}
+                >
                   {currentChapter.content}
                 </div>
               ) : (
