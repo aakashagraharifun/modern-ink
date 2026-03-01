@@ -81,7 +81,14 @@ export default function AdminUploadPage() {
       toast.success("Work uploaded!");
       navigate("/admin/dashboard");
     } catch (err: any) {
-      toast.error(err.message || "Upload failed. Please try again.");
+      const msg = err.message || "Upload failed. Please try again.";
+      if (msg.includes("JWT") || msg.includes("token") || msg.includes("refresh")) {
+        toast.error("Session expired. Please log in again.");
+        await supabase.auth.signOut();
+        navigate("/admin");
+        return;
+      }
+      toast.error(msg);
     } finally {
       clearTimeout(slowTimer);
       setLoading(false);

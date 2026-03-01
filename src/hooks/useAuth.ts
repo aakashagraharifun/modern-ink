@@ -9,7 +9,16 @@ export function useAuth() {
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      async (event, session) => {
+        // Auto-redirect on token errors
+        if (event === "TOKEN_REFRESHED" && !session) {
+          await supabase.auth.signOut();
+          setUser(null);
+          setIsAdmin(false);
+          setLoading(false);
+          return;
+        }
+
         const currentUser = session?.user ?? null;
         setUser(currentUser);
         if (currentUser) {
@@ -27,7 +36,17 @@ export function useAuth() {
       }
     );
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      // If session retrieval fails (expired/invalid token), sign out cleanly
+      if (error || (!session && localStorage.getItem("sb-uojoigfbykdkrmxagmuz-auth-token"))) {
+        supabase.auth.signOut().then(() => {
+          setUser(null);
+          setIsAdmin(false);
+          setLoading(false);
+        });
+        return;
+      }
+
       const currentUser = session?.user ?? null;
       setUser(currentUser);
       if (currentUser) {
