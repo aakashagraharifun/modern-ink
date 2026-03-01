@@ -28,10 +28,13 @@ export default function AdminUploadPage() {
     if (!title.trim()) return;
     setLoading(true);
 
-    // Refresh session silently before upload to prevent stale token issues
+    // Refresh session silently before upload (with timeout to prevent hanging)
     try {
-      await supabase.auth.refreshSession();
-    } catch {}
+      const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 3000));
+      await Promise.race([supabase.auth.refreshSession(), timeout]);
+    } catch {
+      // If refresh fails, proceed anyway — the insert will fail with a clear error if truly expired
+    }
 
     // Show slow connection feedback after 10s
     const slowTimer = setTimeout(() => {
