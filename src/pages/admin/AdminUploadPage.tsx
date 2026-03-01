@@ -26,48 +26,73 @@ export default function AdminUploadPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
-    setLoading(true);
 
-    // Refresh session silently before upload (with timeout to prevent hanging)
+    const runWithTimeout = async <T,>(run: () => Promise<T>, ms: number, step: string): Promise<T> => {
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error(`${step} timed out after ${ms / 1000}s`)), ms)
+      );
+      return Promise.race([run(), timeoutPromise]);
+    };
+
+    setLoading(true);
+    console.log("[upload] submit:start", { title: title.trim(), type, format, hasCover: !!coverFile, hasPdf: !!pdfFile });
+
+    // Best-effort token refresh: never block upload
     try {
-      const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 3000));
-      await Promise.race([supabase.auth.refreshSession(), timeout]);
-    } catch {
-      // If refresh fails, proceed anyway — the insert will fail with a clear error if truly expired
+      console.log("[upload] refreshSession:start");
+      await runWithTimeout(() => supabase.auth.refreshSession(), 3000, "Session refresh");
+      console.log("[upload] refreshSession:done");
+    } catch (refreshErr) {
+      console.warn("[upload] refreshSession:skipped", refreshErr);
     }
 
-    // Show slow connection feedback after 10s
     const slowTimer = setTimeout(() => {
       toast.info("Connection slow, still trying...");
+      console.warn("[upload] still running after 10s");
     }, 10000);
 
     try {
       let coverUrl: string | null = null;
       let pdfUrl: string | null = null;
 
+      if (format === "pdf" && !pdfFile) {
+        throw new Error("Please select a PDF file.");
+      }
+
       // Upload cover
       if (coverFile) {
+        console.log("[upload] cover:start", { name: coverFile.name, size: coverFile.size });
         const ext = coverFile.name.split(".").pop();
         const path = `${crypto.randomUUID()}.${ext}`;
-        const { error } = await supabase.storage.from("covers").upload(path, coverFile);
+        const { error } = await runWithTimeout(
+          () => supabase.storage.from("covers").upload(path, coverFile),
+          20000,
+          "Cover upload"
+        );
         if (error) throw error;
         const { data: urlData } = supabase.storage.from("covers").getPublicUrl(path);
         coverUrl = urlData.publicUrl;
+        console.log("[upload] cover:done", { path });
       }
 
       // Upload PDF
       if (format === "pdf" && pdfFile) {
+        console.log("[upload] pdf:start", { name: pdfFile.name, size: pdfFile.size });
         const ext = pdfFile.name.split(".").pop();
         const path = `${crypto.randomUUID()}.${ext}`;
-        const { error } = await supabase.storage.from("pdfs").upload(path, pdfFile);
+        const { error } = await runWithTimeout(
+          () => supabase.storage.from("pdfs").upload(path, pdfFile),
+          30000,
+          "PDF upload"
+        );
         if (error) throw error;
         const { data: urlData } = supabase.storage.from("pdfs").getPublicUrl(path);
         pdfUrl = urlData.publicUrl;
+        console.log("[upload] pdf:done", { path });
       }
 
       const wordCount = format === "text" ? content.split(/\s+/).filter(Boolean).length : 0;
-
-      const { error } = await supabase.from("works").insert({
+      const payload = {
         title: title.trim(),
         type,
         format,
@@ -77,24 +102,31 @@ export default function AdminUploadPage() {
         description: description.trim() || null,
         is_pinned: isPinned,
         word_count: wordCount,
-      });
+      };
 
+      console.log("[upload] insert:start", { title: payload.title, type: payload.type, format: payload.format });
+      const { error } = await runWithTimeout(async () => await supabase.from("works").insert(payload), 15000, "Work insert");
       if (error) throw error;
 
+      console.log("[upload] insert:done");
       toast.success("Work uploaded!");
       navigate("/admin/dashboard");
     } catch (err: any) {
-      const msg = err.message || "Upload failed. Please try again.";
-      if (msg.includes("JWT") || msg.includes("token") || msg.includes("refresh")) {
+      const msg = err?.message || "Upload failed. Please try again.";
+      console.error("[upload] failed", err);
+
+      if (msg.includes("JWT") || msg.includes("token") || msg.includes("refresh") || msg.includes("session")) {
         toast.error("Session expired. Please log in again.");
         await supabase.auth.signOut();
         navigate("/admin");
         return;
       }
+
       toast.error(msg);
     } finally {
       clearTimeout(slowTimer);
       setLoading(false);
+      console.log("[upload] submit:end");
     }
   };
 
