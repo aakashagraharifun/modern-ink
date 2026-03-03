@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { AnimatePresence } from "framer-motion";
 import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
 import { BackButton } from "@/components/BackButton";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PageTransition } from "@/components/PageTransition";
@@ -67,9 +68,14 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Navbar />
-          <BackButton />
-          <AnimatedRoutes />
+          <div className="flex min-h-screen flex-col">
+            <Navbar />
+            <BackButton />
+            <main className="flex-1">
+              <AnimatedRoutes />
+            </main>
+            <Footer />
+          </div>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
