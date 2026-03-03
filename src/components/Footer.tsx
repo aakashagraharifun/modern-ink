@@ -15,7 +15,7 @@ export function Footer() {
       viewport={{ once: true, amount: 0.3 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
     >
-      <div className="container mx-auto flex flex-col items-center gap-4 px-4 py-8 sm:flex-row sm:justify-between">
+      <div className="container mx-auto flex flex-col items-center gap-2 px-4 py-3 sm:flex-row sm:justify-between sm:gap-4 sm:py-4">
         <p className="text-sm text-muted-foreground">
           © {new Date().getFullYear()} Modern Paper. All rights reserved.
         </p>
@@ -30,7 +30,7 @@ export function Footer() {
               aria-label={link.label}
               className="text-muted-foreground transition-colors hover:text-accent"
             >
-              <link.icon className="h-5 w-5" />
+              <link.icon className="h-4 w-4" />
             </a>
           ))}
         </div>
