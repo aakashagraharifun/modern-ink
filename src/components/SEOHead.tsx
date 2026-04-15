@@ -5,9 +5,10 @@ interface SEOHeadProps {
   description?: string;
   image?: string | null;
   type?: string;
+  schema?: any;
 }
 
-export function SEOHead({ title, description, image, type = "article" }: SEOHeadProps) {
+export function SEOHead({ title, description, image, type = "article", schema }: SEOHeadProps) {
   useEffect(() => {
     const fullTitle = `${title} — Modern Paper`;
     document.title = fullTitle;
@@ -47,10 +48,26 @@ export function SEOHead({ title, description, image, type = "article" }: SEOHead
     setNameMeta("twitter:description", desc);
     if (image) setNameMeta("twitter:image", image);
 
+    // JSON-LD
+    let script = document.querySelector('script[id="json-ld"]') as HTMLScriptElement | null;
+    if (schema) {
+      if (!script) {
+        script = document.createElement("script");
+        script.id = "json-ld";
+        script.setAttribute("type", "application/ld+json");
+        document.head.appendChild(script);
+      }
+      script.textContent = JSON.stringify(schema);
+    } else if (script) {
+      script.remove();
+    }
+
     return () => {
       document.title = "Modern Paper";
+      const s = document.querySelector('script[id="json-ld"]');
+      if (s) s.remove();
     };
-  }, [title, description, image, type]);
+  }, [title, description, image, type, schema]);
 
   return null;
 }

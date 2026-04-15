@@ -1,6 +1,7 @@
 import { useAuthorProfile } from "@/hooks/useWorks";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Instagram, Mail } from "lucide-react";
+import { SEOHead } from "@/components/SEOHead";
 
 export default function AboutPage() {
   const { data: author, isLoading } = useAuthorProfile();
@@ -25,6 +26,11 @@ export default function AboutPage() {
 
   return (
     <main className="container mx-auto max-w-2xl px-4 py-10">
+      <SEOHead 
+        title={`About ${author.name}`} 
+        description={author.bio?.slice(0, 160) || `Learn more about Aakash Agrahari and his writing journey.`} 
+        image={author.photo_url}
+      />
       {/* Photo */}
       {author.photo_url && (
         <div className="mb-8 flex justify-center">

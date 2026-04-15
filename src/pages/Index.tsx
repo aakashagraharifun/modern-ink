@@ -3,6 +3,7 @@ import { WorkCard } from "@/components/WorkCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { SEOHead } from "@/components/SEOHead";
 
 const Index = () => {
   const { data: settings } = useSiteSettings();
@@ -13,8 +14,26 @@ const Index = () => {
   const stories = works?.filter((w) => w.type === "story" && !w.is_pinned) ?? [];
   const poems = works?.filter((w) => w.type === "poem" && !w.is_pinned) ?? [];
 
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": settings?.site_title || "Modern Paper",
+    "url": "https://aakashpoems.cloud/",
+    "author": {
+      "@type": "Person",
+      "name": "Aakash Agrahari",
+      "jobTitle": "Writer & Creator"
+    },
+    "description": settings?.tagline || "A Literary Portfolio featuring poems, novels, and stories."
+  };
+
   return (
     <main className="min-h-screen">
+      <SEOHead 
+        title="Home" 
+        description="Welcome to Modern Paper, a creative portfolio by Aakash Agrahari featuring poems, novels, and stories." 
+        schema={schema}
+      />
       {/* Hero */}
       <section className="container mx-auto px-4 py-20 text-center md:py-28">
         <motion.h1

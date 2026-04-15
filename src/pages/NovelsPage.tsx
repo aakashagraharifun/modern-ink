@@ -1,12 +1,14 @@
 import { useWorks } from "@/hooks/useWorks";
 import { WorkCard } from "@/components/WorkCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SEOHead } from "@/components/SEOHead";
 
 export default function NovelsPage() {
   const { data: works, isLoading } = useWorks("novel");
 
   return (
     <main className="container mx-auto px-4 py-10">
+      <SEOHead title="Novels" description="Explore original novels and long-form stories by Aakash Agrahari." />
       <h1 className="mb-8 font-serif text-3xl font-bold">Novels</h1>
       {isLoading ? (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">

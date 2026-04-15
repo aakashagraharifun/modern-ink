@@ -1,12 +1,14 @@
 import { useWorks } from "@/hooks/useWorks";
 import { WorkCard } from "@/components/WorkCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SEOHead } from "@/components/SEOHead";
 
 export default function StoriesPage() {
   const { data: works, isLoading } = useWorks("story");
 
   return (
     <main className="container mx-auto px-4 py-10">
+      <SEOHead title="Stories" description="Read captivating short stories and narratives by Aakash Agrahari." />
       <h1 className="mb-8 font-serif text-3xl font-bold">Stories</h1>
       {isLoading ? (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
